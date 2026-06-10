@@ -1,0 +1,98 @@
+# Wesley Gavitt
+# WESGAV9989
+# Final Performance Assessment
+# This program asks for numbers, appends income data to a CSV file,
+# creates an Excel pie chart, and creates a matplotlib bar graph.
+
+import csv
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import date
+from openpyxl import Workbook
+from openpyxl.chart import PieChart, Reference
+
+
+def askUser():
+    total = 0
+
+    # This loop asks the user for five numbers and adds each number to the running total.
+    for count in range(5):
+        number = int(input("Please enter a number: "))
+        total = total + number
+
+    print(f"The sum for the 5 numbers entered is: {total}")
+
+
+def askIncome():
+    path = r"C:\Users\wesga\Desktop\SDC205\Week 5\5.5 Final\final.csv"
+
+    # This loop asks the user for five names and incomes, then appends each entry to the CSV file.
+    with open(path, "a", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+
+        for count in range(5):
+            name = input("Please enter a name: ")
+            income = input("Please enter their income: ")
+            writer.writerow([name, income])
+
+
+def excelPie():
+    csvPath = r"C:\Users\wesga\Desktop\SDC205\Week 5\5.5 Final\final.csv"
+    excelPath = r"C:\Users\wesga\Desktop\SDC205\Week 5\5.5 Final\final.xlsx"
+
+    dataFrame = pd.read_csv(csvPath, header=None)
+
+    workbook = Workbook()
+    sheet = workbook.active
+
+    # This line writes each row from the CSV file into the Excel sheet.
+    for row in dataFrame.values.tolist():
+        sheet.append(row)
+
+    # This line creates a pie chart object.
+    pie = PieChart()
+
+    # This line selects the income values for the pie chart.
+    data = Reference(sheet, min_col=2, min_row=1, max_row=sheet.max_row)
+
+    # This line selects the names to use as pie chart labels.
+    labels = Reference(sheet, min_col=1, min_row=1, max_row=sheet.max_row)
+
+    # This line adds the income data to the pie chart.
+    pie.add_data(data)
+
+    # This line adds the names as category labels.
+    pie.set_categories(labels)
+
+    # This line creates the chart title using the student ID and today's date.
+    pie.title = f"WESGAV9989 {date.today().strftime('%B %d, %Y')}"
+
+    # This line places the pie chart into the Excel sheet.
+    sheet.add_chart(pie, "A10")
+
+    workbook.save(excelPath)
+
+
+def verticalBar():
+    path = r"C:\Users\wesga\Desktop\SDC205\Week 5\5.5 Final\final.csv"
+
+    dataFrame = pd.read_csv(path, header=None, names=["Name", "Income"])
+
+    dataFrame["Income"] = dataFrame["Income"].astype(int)
+
+    plt.bar(dataFrame["Name"], dataFrame["Income"], label="Income")
+    plt.title(f"WESGAV9989 {date.today().strftime('%B %d, %Y')}")
+    plt.xlabel("Name")
+    plt.ylabel("Income")
+    plt.legend()
+    plt.show()
+
+
+def main():
+    askUser()
+    askIncome()
+    excelPie()
+    verticalBar()
+
+
+main()
